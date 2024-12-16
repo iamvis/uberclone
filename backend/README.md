@@ -114,3 +114,116 @@ Ensure the following:
 - `bcrypt`
 - `jsonwebtoken`
 - `mongoose`
+
+# /users/login Endpoint Documentation
+
+## Description
+The `/users/login` endpoint allows users to log in by providing their email and password. It validates the input data and returns an authentication token if the login is successful.
+
+---
+
+## Endpoint
+`POST /users/login`
+
+---
+
+## Request
+
+### Headers
+- `Content-Type: application/json`
+
+### Body (JSON)
+The request body must include the following fields:
+
+| Field    | Type   | Required | Description                     |
+|----------|--------|----------|---------------------------------|
+| `email`  | String | Yes      | The user's email address.       |
+| `password`| String| Yes      | The user's password (min. 6).   |
+
+#### Example Request Body:
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword"
+}
+```
+
+---
+
+## Response
+
+### Success Response
+- **Status Code:** `200 OK`
+- **Content:** JSON object containing the authentication token and user data.
+
+#### Example:
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "user": {
+    "_id": "64d43ebf5e6a",
+    "email": "user@example.com",
+    "firstname": "John",
+    "lastname": "Doe"
+  }
+}
+```
+
+### Error Responses
+
+| Status Code | Description                         |
+|-------------|-------------------------------------|
+| `400`       | Validation errors in input fields.  |
+| `401`       | Invalid email or password.          |
+
+#### Example Error Responses:
+1. **Validation Error (400):**
+   ```json
+   {
+     "errors": [
+       {
+         "msg": "Invalid Email",
+         "param": "email",
+         "location": "body"
+       }
+     ]
+   }
+   ```
+
+2. **Authentication Failure (401):**
+   ```json
+   {
+     "message": "Invalid Email or Password"
+   }
+   ```
+
+---
+
+## Implementation Details
+
+### Validation
+The following validations are performed on the request body:
+1. `email` must be a valid email address.
+2. `password` must be at least 6 characters long.
+
+### Logic
+1. Validate the input using `express-validator`.
+2. Check if a user with the provided email exists in the database.
+3. If the user exists, compare the provided password with the stored (hashed) password.
+4. If the password matches, generate and return a JWT token along with user details.
+5. If any step fails, return the appropriate error response.
+
+---
+
+## Files
+This endpoint is implemented in the following files:
+- **Route Definition:** `routes/user.route.js`
+- **Controller Logic:** `controllers/user.controller.js`
+- **Model Definition:** `models/user.model.js`
+
+---
+
+## Notes
+- The endpoint requires the password field to be explicitly included in the query using `.select('+password')`.
+- Password comparison is done using a method like `comparePassword` defined in the user model.
+

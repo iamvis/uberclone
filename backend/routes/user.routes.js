@@ -16,5 +16,14 @@ router.post('/register',[
 userController.registerUser
 )
 
+//for sign in validation by express-validator
+router.post('/login', [
+    //checking+ validation result send to the express-validator used in controller
+    body('email').isEmail().withMessage('Invalid Email'),
+    body('password').isLength({min:6}).withMessage('password must be at least 6')
+],
+
+userController.loginUser)
+
 
 module.exports = router;
