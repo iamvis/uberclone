@@ -40,7 +40,9 @@ const userSchema = new mongoose.Schema({
 //user token genarate
 userSchema.methods.generateAuthToken = function(){
     //give the id and the key it wil;l generate uniquewq token for specific candidate
-    const token = jwt.sign({_id:this._id}, process.env.JWT_SECRET) 
+    const token = jwt.sign({_id:this._id},
+         process.env.JWT_SECRET,
+          {expiresIn:'24h'}) 
     return token;
 }
 

@@ -227,3 +227,168 @@ This endpoint is implemented in the following files:
 - The endpoint requires the password field to be explicitly included in the query using `.select('+password')`.
 - Password comparison is done using a method like `comparePassword` defined in the user model.
 
+# /users/profile Endpoint Documentation
+
+## **Description**
+This document outlines the details for the `/users/profile` endpoint.
+
+---
+
+## **/users/profile**
+
+### **URL**: `/users/profile`  
+### **Method**: `GET`
+
+### **Description**:
+The `/users/profile` endpoint retrieves the profile information of the authenticated user.
+
+### **Headers**
+| Header            | Type     | Description                              |
+|-------------------|----------|------------------------------------------|
+| `Authorization`   | `string` | Bearer token or token in cookies.       |
+
+### **Validation**:
+Authentication is required using the token in the request headers or cookies.
+
+### **Success Response**:
+| Status Code | Description               |
+|-------------|---------------------------|
+| `200`       | User profile retrieved.   |
+
+#### Example Response:
+```json
+{
+  "_id": "63a1234567890abc12345def",
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "john.doe@example.com"
+}
+```
+
+### **Error Response**:
+| Status Code | Description                  |
+|-------------|------------------------------|
+| `401`       | Unauthorized or token invalid. |
+
+#### Example Error Response:
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+---
+
+## **Internal Logic Overview**
+- The token is extracted from cookies or the `Authorization` header.
+- The token is verified, and the corresponding user is fetched from the database.
+- The middleware `authUser` ensures only authenticated users can access this endpoint.
+
+---
+
+## **Setup Instructions**
+Ensure the following:
+- The `JWT_SECRET` is configured in your environment variables.
+- Required dependencies (`express`, `jsonwebtoken`, `mongoose`, etc.) are installed.
+
+---
+
+## **Dependencies**
+- `express`
+- `jsonwebtoken`
+- `mongoose`
+- `cookie-parser` (for managing cookies)
+
+
+# /users/logout Endpoint Documentation
+
+## **Overview**
+The `/users/logout` endpoint allows authenticated users to log out by clearing their session token from cookies and blacklisting it to prevent further use.
+
+---
+
+## **Endpoint Details**
+
+### **URL**: `/users/logout`
+### **Method**: `GET`
+
+### **Headers**
+| Header            | Type     | Description                              |
+|-------------------|----------|------------------------------------------|
+| `Authorization`   | `string` | Bearer token (optional if using cookies).|
+
+### **Authentication**
+- A valid token is required, either from cookies or passed as a Bearer token in the `Authorization` header.
+
+### **Success Response**:
+| Status Code | Description                  |
+|-------------|------------------------------|
+| `200`       | User successfully logged out.|
+
+#### **Example Response**:
+```json
+{
+  "message": "Logged out"
+}
+```
+
+### **Error Responses**:
+| Status Code | Description                       |
+|-------------|-----------------------------------|
+| `401`       | Unauthorized or invalid token.    |
+
+#### **Example Error Response**:
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+---
+
+## **Implementation Details**
+
+1. **Clearing Cookies**:
+   - The token is removed from the user's cookies, effectively ending their session.
+
+2. **Blacklisting Tokens**:
+   - The token is added to a `BlacklistToken` collection in the database.
+   - Blacklisted tokens are automatically expired after 24 hours.
+
+3. **Middleware**:
+   - The `authUser` middleware validates the user’s token before allowing access to the endpoint.
+
+---
+
+## **Setup Requirements**
+To use this endpoint:
+- Ensure `JWT_SECRET` is defined in your environment variables.
+- Install the following dependencies:
+  - `express` for handling HTTP requests.
+  - `jsonwebtoken` for token generation and verification.
+  - `mongoose` for database interaction.
+  - `cookie-parser` for managing cookies.
+- Implement the `BlacklistToken` schema in the database to store blacklisted tokens:
+
+```javascript
+const blacklistTokenSchema = new mongoose.Schema({
+    token: {
+        type: String,
+        required: true,
+        unique: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now,
+        expires: 86400 // 24 hours in seconds
+    }
+});
+
+module.exports = mongoose.model('BlacklistToken', blacklistTokenSchema);
+```
+
+---
+
+
