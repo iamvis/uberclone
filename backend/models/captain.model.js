@@ -19,7 +19,7 @@ const captainSchema = new mongoose.Schema({
         required:true,
         unique:true,
         lowercase:true,
-        match:[/^\S+@\.\S+$/, 'Please enter a valid email address']
+        match:[/^\S+@\S+\.\S+$/, 'Please enter a valid email address']
     },
     password:{
         type:String,
@@ -73,7 +73,7 @@ const captainSchema = new mongoose.Schema({
 
 //method for generating toke
 captainSchema.methods.generateAuthToken = function (){
-    const token = jwt.sign({_id:this._id}, process.env.JWT_SECRET, {expiresIn:'24h'})
+    const token = jwt.sign({_id:this._id}, process.env.JWT_SECRET, {expiresIn:'24h'});
    return token;
 }
 

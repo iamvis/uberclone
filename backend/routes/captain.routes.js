@@ -7,7 +7,6 @@ const captainController = require('../controllers/captain.controller')
 //post validation by express validation
 router.post('/register',[
     body('fullname.firstname').isLength({min:3}).withMessage('firstname must be at least 3 characters long'),
-    body('fullname.lastname').isLength({min:3}).withMessage('lastname must be at least 3 characters long'),
     body('email').isEmail().withMessage('Inavalid Email'),
     body('password').isLength({min:6}).withMessage('Password must be at least 6 characters long'),
     body('vehicle.color').isLength({min:3}).withMessage('Color must be at least 3 characters long'),

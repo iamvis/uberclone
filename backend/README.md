@@ -391,4 +391,145 @@ module.exports = mongoose.model('BlacklistToken', blacklistTokenSchema);
 
 ---
 
+# /captains/register Endpoint Documentation
+
+## **Overview**
+The `/captain/register` endpoint allows new captains to register by providing their personal and vehicle information. Validation is enforced to ensure the data meets the required criteria.
+
+---
+
+## **Endpoint Details**
+
+### **URL**: `/captain/register`
+### **Method**: `POST`
+
+---
+
+## **Request Requirements**
+
+### **Headers**
+| Header            | Type     | Description                              |
+|-------------------|----------|------------------------------------------|
+| `Content-Type`    | `string` | Must be `application/json`.             |
+
+### **Request Body**
+The request body must be in JSON format and include the following fields:
+
+| Field                     | Type     | Required | Validation                                     |
+|---------------------------|----------|----------|------------------------------------------------|
+| `fullname.firstname`      | `string` | Yes      | Minimum 3 characters.                         |
+| `fullname.lastname`       | `string` | No       | Minimum 3 characters.                         |
+| `email`                   | `string` | Yes      | Must be a valid email format.                 |
+| `password`                | `string` | Yes      | Minimum 6 characters.                         |
+| `vehicle.color`           | `string` | Yes      | Minimum 3 characters.                         |
+| `vehicle.plate`           | `string` | Yes      | Minimum 4 characters.                         |
+| `vehicle.capacity`        | `number` | Yes      | Must be at least 1.                           |
+| `vehicle.vehicletype`     | `string` | Yes      | Must be one of: `car`, `motorcycle`, `auto`.  |
+
+#### **Example Request Body**
+```json
+{
+  "fullname": {
+    "firstname": "John",
+    "lastname": "Doe"
+  },
+  "email": "john.doe@example.com",
+  "password": "password123",
+  "vehicle": {
+    "color": "Blue",
+    "plate": "XYZ1234",
+    "capacity": 4,
+    "vehicletype": "car"
+  }
+}
+```
+
+---
+
+## **Response Details**
+
+### **Success Response**:
+| Status Code | Description                  |
+|-------------|------------------------------|
+| `201`       | Captain registered successfully. |
+
+#### **Example Success Response**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+  "captain": {
+    "fullname": {
+      "firstname": "John",
+      "lastname": "Doe"
+    },
+    "email": "john.doe@example.com",
+    "vehicle": {
+      "color": "Blue",
+      "plate": "XYZ1234",
+      "capacity": 4,
+      "vehicletype": "car"
+    },
+    "status": "inactive"
+  }
+}
+```
+
+### **Error Responses**:
+| Status Code | Description                      |
+|-------------|----------------------------------|
+| `400`       | Validation error or missing data. |
+| `400`       | Captain already exists.           |
+
+#### **Example Error Response** (Validation Error)
+```json
+{
+  "errors": [
+    {
+      "msg": "Email is invalid",
+      "param": "email",
+      "location": "body"
+    }
+  ]
+}
+```
+
+#### **Example Error Response** (Captain Exists)
+```json
+{
+  "message": "Captain already exists"
+}
+```
+
+---
+
+## **Implementation Details**
+1. **Validation**:
+   - Express-validator is used to validate the incoming data.
+   - Ensures that all required fields are present and meet the criteria.
+
+2. **Password Handling**:
+   - The password is hashed using `bcrypt` before storing it in the database.
+
+3. **Token Generation**:
+   - A JWT token is generated upon successful registration for authentication.
+
+4. **Error Handling**:
+   - Provides detailed error messages for validation failures and duplicate registrations.
+
+---
+
+## **Dependencies**
+- `express`
+- `express-validator`
+- `mongoose`
+- `bcrypt`
+- `jsonwebtoken`
+
+---
+
+## **Setup Instructions**
+Ensure the following:
+- The `JWT_SECRET` environment variable is configured.
+- Required dependencies are installed.
+- A valid MongoDB connection is established.
 
