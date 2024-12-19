@@ -533,3 +533,145 @@ Ensure the following:
 - Required dependencies are installed.
 - A valid MongoDB connection is established.
 
+
+# API Documentation for Captain Endpoints
+
+## /captain/login
+### Description
+This endpoint allows a captain to log in using their email and password.
+
+### HTTP Method
+POST
+
+### Request Body
+```json
+{
+  "email": "captain@example.com",
+  "password": "password123"
+}
+```
+
+### Validation Rules
+- `email`: Must be a valid email address.
+- `password`: Must be at least 6 characters long.
+
+### Response
+- **200 OK**: Successfully authenticated. Returns a token and captain details.
+```json
+{
+  "token": "<JWT_TOKEN>",
+  "captain": {
+    "id": "<CAPTAIN_ID>",
+    "email": "captain@example.com",
+    "firstname": "John",
+    "lastname": "Doe"
+  }
+}
+```
+- **400 Bad Request**: Invalid email or password.
+```json
+{
+  "message": "Invalid Email or Password"
+}
+```
+- **400 Bad Request**: Validation errors.
+```json
+{
+  "errors": [
+    {
+      "msg": "Invalid Email",
+      "param": "email",
+      "location": "body"
+    }
+  ]
+}
+```
+
+### Headers
+- **Authorization**: Not required.
+
+### Cookies
+- Sets a `token` cookie upon successful login.
+
+---
+
+
+#  Profile Endpoints
+
+## /captain/profile
+### Description
+This endpoint retrieves the authenticated captain's profile information.
+
+### HTTP Method
+GET
+
+### Headers
+- **Authorization**: Required. The JWT token must be included in the `Authorization` header in the format:
+  ```
+  Bearer <JWT_TOKEN>
+  ```
+
+### Response
+- **200 OK**: Returns the captain's profile details.
+```json
+{
+  "id": "<CAPTAIN_ID>",
+  "email": "captain@example.com",
+  "firstname": "John",
+  "lastname": "Doe",
+  "vehicle": {
+    "color": "Blue",
+    "plate": "ABC1234",
+    "vehicletype": "car",
+    "capacity": 4
+  }
+}
+```
+- **401 Unauthorized**: If the token is missing, invalid, or expired.
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+### Cookies
+- The `token` cookie can also be used for authentication if present.
+
+---
+
+#  Logout Endpoints
+
+## /captain/logout
+### Description
+This endpoint logs out the authenticated captain by invalidating their token.
+
+### HTTP Method
+GET
+
+### Headers
+- **Authorization**: Required. The JWT token must be included in the `Authorization` header in the format:
+  ```
+  Bearer <JWT_TOKEN>
+  ```
+
+### Response
+- **200 OK**: Successfully logged out.
+```json
+{
+  "message": "Logged out"
+}
+```
+- **401 Unauthorized**: If the token is missing, invalid, or expired.
+```json
+{
+  "message": "Unauthorized"
+}
+```
+
+### Cookies
+- Clears the `token` cookie upon logout.
+
+---
+
+
+

@@ -1,3 +1,4 @@
+const blacklistTokenModel = require('../models/blacklistToken.model');
 const captainModel = require('../models/captain.model')
 const captainService = require('../services/captain.service')
 const {validationResult} = require('express-validator')
@@ -51,38 +52,52 @@ module.exports.registerCaptain = async (req, res, next )=>{
 
 
 
-// module.exports.registerCaptain = async (req, res, next) =>{
-//     //validation response from express-validator
-//     //erorr handle from express-validator
-//     const errors = validationResult(req);
-//     if(!errors.isEmpty()){
-//         return res.status(400).json({errors: errors.array()})
-//     }
+module.exports.loginCaptain = async (req, res, next) =>{
+    //validation response from express-validator
+    //erorr handle from express-validator
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        return res.status(400).json({errors: errors.array()})
+    }
 
-
-//     //get data from requeest BODY
-//     const {name, email, password, vehicle}= req.body;
+    console.log();
+    //get data from requeest BODY
+    const {email, password}= req.body;
 
     
-// // By default, Mongoose does not return fields that are explicitly marked as "excluded" in the model schema (e.g., password might be excluded via select: false in the schema).
-// // The +password here overrides the default behavior, explicitly including the password field in the query result.
-// const captain =await captainModel.findOne({email}).select('+password');
+// By default, Mongoose does not return fields that are explicitly marked as "excluded" in the model schema (e.g., password might be excluded via select: false in the schema).
+// The +password here overrides the default behavior, explicitly including the password field in the query result.
+const captain =await captainModel.findOne({email}).select('+password');
 
-// if(!captain){
-//     return res.status(400).json({message:'Invalid Email or Password'})
-// }
+if(!captain){
+   
+    return res.status(400).json({message:'Invalid Email or Password'})
+}
 
-// //comparing
-//     const isMatch = await captain.comparePassword(password)
-//     if(!isMatch){
-//         return res.status(400).json({message: 'Invalid Email or Password'})
-//     }
+//comparing
+    const isMatch = await captain.comparePassword(password)
+    if(!isMatch){
+        return res.status(400).json({message: 'Invalid Email or Password'})
+    }
 
-//     //generate token
-//     const token = await captain.generateAuthToken();
+    //generate token
+    const token = await captain.generateAuthToken();
 
-//     //set cookie token
-//     res.cookie ('token', token);
-//     res.status(200).json({token,captain})
-// }
+    //set cookie token
+    res.cookie ('token', token);
+    res.status(200).json({token,captain})
+}
 
+
+module.exports.getCaptainProfile = async(req, res, next)=>{
+    res.status(200).json(req.captain)
+}
+
+
+module.exports.logoutCaptain= async(req, res, next)=>{
+    //remove cookie from session
+    res.clearCookie('token');
+    const token = req.cookies.token || req.headers.authorization.split(' ')[1];
+    await blacklistTokenModel.create({token});
+    res.status(200).json({message: 'Logged out'})
+}

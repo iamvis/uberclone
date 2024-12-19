@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const {body} = require('express-validator');
-const captainController = require('../controllers/captain.controller')
+const captainController = require('../controllers/captain.controller');
+const authMeddleware= require('../middlewares/auth.middlewares')
 
 
 //post validation by express validation
@@ -18,6 +19,17 @@ router.post('/register',[
     captainController.registerCaptain
 )
 
+//post validation by express validation for login
+router.post('/login',[
+    body('email').isEmail().withMessage('Invalid Email'),
+    body('password').isLength({min:6}).withMessage('Password must be at least 6 characters')
+],
+   //passing as captainCopntroller // action perform by logincaptain
+   captainController.loginCaptain
+)
+//get profile request
+router.get('/profile', authMeddleware.authCaptain, captainController.getCaptainProfile);
 
+router.get('/logout', authMeddleware.authCaptain, captainController.logoutCaptain);
 
 module.exports= router;
